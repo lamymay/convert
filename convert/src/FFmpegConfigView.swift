@@ -7,7 +7,7 @@ struct FFmpegConfigView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("配置 FFmpeg 路径")
+            Text("配置 FFmpeg 路径（退出按ESC）")
                 .font(.title2)
             TextField("FFmpeg 可执行文件路径", text: $ffmpegPath)
                 .font(.system(size: 12, design: .monospaced))
