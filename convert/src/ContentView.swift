@@ -23,6 +23,8 @@ struct ContentView: View {
 
   @State private var showSummaryAlert = false
 
+  @State private var selectedPreset: String = "ALAC"
+
   var body: some View {
     HStack(alignment: .top, spacing: 16) {
 
@@ -131,6 +133,81 @@ struct ContentView: View {
           )
         ).font(.system(size: 12, design: .monospaced))
 
+        VStack(alignment: .leading, spacing: 4) {
+          Text("输出参数 (FFmpeg)").bold()
+          HStack {
+
+            Button("ALAC") {
+              conversionManager.outputArguments = [
+                "-map", "0:a",
+                "-c:a", "alac",
+                "-map", "0:v?",
+                "-c:v", "copy",
+                "-map_metadata", "0",
+                "-movflags", "faststart",
+              ]
+              selectedPreset = "ALAC"
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(selectedPreset == "ALAC" ? .blue : .gray)
+
+            Button("AAC") {
+              conversionManager.outputArguments = [
+                "-map", "0:a",
+                "-c:a", "aac",
+                "-b:a", "192k",
+                "-map", "0:v?",
+                "-c:v", "mjpeg",
+                "-map_metadata", "0",
+                "-movflags", "faststart",
+              ]
+              selectedPreset = "AAC"
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(selectedPreset == "AAC" ? .blue : .gray)
+
+            Button("WAV") {
+              conversionManager.outputArguments = [
+                "-map", "0:a",
+                "-c:a", "pcm_s16le",
+                "-map_metadata", "0",
+                // 不要拷贝视频封面，否则wav容器挂掉
+              ]
+              selectedPreset = "WAV"
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(selectedPreset == "WAV" ? .blue : .gray)
+
+            Button("MP3") {
+              conversionManager.outputArguments = [
+                "-c:a", "libmp3lame", "-b:a", "192k", "-map_metadata", "0",
+              ]
+              selectedPreset = "MP3"
+
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(selectedPreset == "MP3" ? .blue : .gray)
+
+          }
+          .font(.subheadline)
+          .buttonStyle(.bordered)
+
+          TextEditor(
+            text: Binding(
+              get: { conversionManager.outputArguments.joined(separator: " ") },
+              set: { newValue in
+                conversionManager.outputArguments =
+                  newValue
+                  .split(separator: " ")
+                  .map { String($0) }
+              }
+            )
+          )
+          .font(.system(size: 11, design: .monospaced))
+          .frame(height: 60)
+          .border(Color.gray.opacity(0.5))
+        }
+        .padding(.bottom, 8)
         HStack(spacing: 12) {
           Button("配置&测试 FFmpeg ") {
             showConfigFFmpeg = true
