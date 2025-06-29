@@ -107,7 +107,7 @@ struct ContentView: View {
 
       // === 功能块 3 转换及日志 ===
       VStack(alignment: .leading, spacing: 8) {
-        Text("③ 格式转换").bold()
+        Text("③ 格式转换到ALAC（Apple Lossless）").bold()
 
         Button("选择输出目录") {
           pickOutputFolder()
