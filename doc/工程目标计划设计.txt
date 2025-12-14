@@ -1,0 +1,6 @@
+## 设计
+
+常见音乐格式 WAV/FLAC/ALAC/AAC/WAV
+
+###  image cannot copy still now
+ 对于支持内嵌图片的音频的容器，原始图片的copy功能待完整支持。 例如：MP3

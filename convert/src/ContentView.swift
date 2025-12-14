@@ -116,7 +116,7 @@ struct ContentView: View {
         }
 
         TextField(
-          "输出目录",
+          "设定输出目录（设置缺省时输出文件与输入文件同目录）",
           text: Binding(
             get: {
               if let folder = outputFolder {
@@ -134,7 +134,7 @@ struct ContentView: View {
         ).font(.system(size: 12, design: .monospaced))
 
         VStack(alignment: .leading, spacing: 4) {
-          Text("输出参数 (FFmpeg)").bold()
+          Text("FFmpeg模版参数设定（方式1用模版 / 方式2用手动输入（待实现））").bold()
           HStack {
 
             Button("ALAC") {
@@ -321,7 +321,7 @@ struct ContentView: View {
               appendLog("扫描文件夹: \(url.lastPathComponent)")
               let files = FileManagerHelper.scanFilesRecursively(url)
               droppedFiles.append(contentsOf: files)
-              appendLog("共扫描到 \(files.count) 个文件")
+              appendLog("共扫识别到 \(files.count) 个文件")
             } else {
               droppedFiles.append(url)
               appendLog("检测到文件: \(url.lastPathComponent)")

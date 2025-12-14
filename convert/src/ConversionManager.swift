@@ -62,32 +62,35 @@ class ConversionManager: ObservableObject {
     logCallback?("⚠️ 用户手动停止了转换")
   }
 
-  private func convertFile(_ file: URL, outputFolder: URL?) -> Bool {
+private func convertFile(_ file: URL, outputFolder: URL?) -> Bool {
     let targetFolder = outputFolder ?? file.deletingLastPathComponent()
     let targetBase = file.deletingPathExtension().lastPathComponent
 
-    // === 自动根据编码判断扩展名 ===
+    // === 根据 outputArguments 推断扩展名 ===
     let ext: String
-    let codecName = outputArguments[safe: 1] ?? "alac"
-    switch codecName {
-    case "alac", "aac":
-      ext = "m4a"
-    case "pcm_s16le":
-      ext = "wav"
-    case "libmp3lame":
-      ext = "mp3"
-    default:
-      ext = "m4a"
+    if let lastArg = outputArguments.last {
+        // 尝试根据最后一个参数推断
+        if lastArg.contains(".m4a") || outputArguments.contains("alac") || outputArguments.contains("aac") {
+            ext = "m4a"
+        } else if outputArguments.contains("pcm_s16le") {
+            ext = "wav"
+        } else if outputArguments.contains("libmp3lame") {
+            ext = "mp3"
+        } else {
+            // 默认 fallback
+            ext = "m4a"
+        }
+    } else {
+        ext = "m4a"
     }
 
     var targetName = "\(targetBase).\(ext)"
-
     var finalURL = targetFolder.appendingPathComponent(targetName)
     var counter = 1
     while FileManager.default.fileExists(atPath: finalURL.path) {
-      targetName = "\(targetBase)_\(counter).\(ext)"
-      finalURL = targetFolder.appendingPathComponent(targetName)
-      counter += 1
+        targetName = "\(targetBase)_\(counter).\(ext)"
+        finalURL = targetFolder.appendingPathComponent(targetName)
+        counter += 1
     }
 
     logCallback?("转换中: \(file.lastPathComponent) → \(finalURL.path)")
@@ -105,31 +108,33 @@ class ConversionManager: ObservableObject {
 
     let handle = pipe.fileHandleForReading
     handle.readabilityHandler = { fileHandle in
-      if let output = String(data: fileHandle.availableData, encoding: .utf8),
-        !output.isEmpty
-      {
-        self.logCallback?(output.trimmingCharacters(in: .whitespacesAndNewlines))
-      }
+        if let output = String(data: fileHandle.availableData, encoding: .utf8),
+           !output.isEmpty
+        {
+            self.logCallback?(output.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
     }
 
     var success = false
     do {
-      try process.run()
-      process.waitUntilExit()
-      if process.terminationStatus == 0 {
-        logCallback?("✅ 转换完成: \(finalURL.lastPathComponent)")
-        success = true
-      } else {
-        logCallback?("❌ 转换失败，退出码: \(process.terminationStatus)")
-      }
+        try process.run()
+        process.waitUntilExit()
+        if process.terminationStatus == 0 {
+            logCallback?("✅ 转换完成: \(finalURL.lastPathComponent)")
+            success = true
+        } else {
+            logCallback?("❌ 转换失败，退出码: \(process.terminationStatus)")
+        }
     } catch {
-      logCallback?("❌ 转换失败: \(error.localizedDescription)")
+        logCallback?("❌ 转换失败: \(error.localizedDescription)")
     }
 
     handle.readabilityHandler = nil
     currentProcess = nil
     return success
-  }
+}
+
+
 }
 
 // MARK: - 安全数组下标扩展
